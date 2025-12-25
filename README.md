@@ -36,6 +36,8 @@ Hallon (`ˈhàlɔn`) means raspberry in Swedish, a befitting name for a package 
 
 ## Development
 
+Use https://github.com/typst-community/tytanic for testing.
+
 Create a symlink to more easily develop your package changes:
 
 ```
