@@ -1,3 +1,5 @@
+// Depends on https://github.com/EpicEricEE/typst-equate/pull/23
+
 #set page(width: 12cm, height: auto)
 
 #import "@preview/hallon:0.1.3" as hallon: subfigure
