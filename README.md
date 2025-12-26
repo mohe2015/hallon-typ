@@ -4,31 +4,31 @@ A collection of utility functions for Typst.
 
 ## Named references example
 
-See [example/example-nameref.typ](example/example-nameref.typ).
+See [tests/example-nameref/test.typ](tests/example-nameref/test.typ).
 
-![Named references example](example/example-nameref.png)
+![Named references example](tests/example-nameref/ref/1.png)
 
 ## Subfigures example
 
-See [example/example-subfig.typ](example/example-subfig.typ).
+See [tests/example-subfig/test.typ](tests/example-subfig/test.typ).
 
-![Subfigures example](example/example-subfig.png)
+![Subfigures example](tests/example-subfig/ref/1.png)
 
 ## Heading-dependent numbering of figures
 
-See [example/example-figs.typ](example/example-figs.typ).
+See [tests/example-figs/test.typ](tests/example-figs/test.typ).
 
-![Heading-dependent numbering of figures](example/example-figs.png)
+![Heading-dependent numbering of figures](tests/example-figs/ref/1.png)
 
-See [example/example-appendix.typ](example/example-appendix.typ).
+See [tests/example-appendix/test.typ](tests/example-appendix/test.typ).
 
-![Heading-dependent numbering of figures with appendices](example/example-appendix.png)
+![Heading-dependent numbering of figures with appendices](tests/example-appendix/ref/1.png)
 
 ## Custom figure and subfigure caption style
 
-See [example/example-custom-caption.typ](example/example-custom-caption.typ).
+See [tests/example-custom-caption/test.typ](tests/example-custom-caption/test.typ).
 
-![Custom figure and subfigure caption style](example/example-custom-caption.png)
+![Custom figure and subfigure caption style](tests/example-custom-caption/ref/1.png)
 
 ## Etymology
 
