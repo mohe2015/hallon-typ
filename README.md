@@ -37,7 +37,11 @@ Hallon (`ˈhàlɔn`) means raspberry in Swedish, a befitting name for a package 
 ## Development
 
 ```bash
+# Needs https://github.com/typst-community/tytanic/pull/294
+cargo install --locked --git https://github.com/mohe2015/tytanic --branch fix-custom-packages-support
 # Typst 0.15 support
-cargo install --locked --git https://github.com/typst-community/tytanic
-tt run
+# cargo install --locked --git https://github.com/typst-community/tytanic
+TYPST_PACKAGE_PATH=$PWD/packages tt run
 ```
+
+Start your editor with `TYPST_PACKAGE_PATH=$PWD/packages` set.
