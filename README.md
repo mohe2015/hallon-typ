@@ -33,3 +33,11 @@ See [example/example-custom-caption.typ](example/example-custom-caption.typ).
 ## Etymology
 
 Hallon (`ˈhàlɔn`) means raspberry in Swedish, a befitting name for a package that contains *"lite smått och gott"*.
+
+## Development
+
+```bash
+# Typst 0.15 support
+cargo install --locked --git https://github.com/typst-community/tytanic
+tt run
+```
