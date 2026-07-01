@@ -10,7 +10,7 @@
     #it.body
   ]
 }
-#show: hallon.style-figures.with(heading-levels: 1)
+#show: hallon.style-figures(heading-levels: 1).rule
 
 // === [ Main matter ] =========================================================
 
