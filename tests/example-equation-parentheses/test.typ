@@ -1,0 +1,59 @@
+#import "@preview/hallon:0.1.3" as hallon: subfigure
+
+#set math.equation(numbering: "(1)")
+
+= Chapter 1
+
+$ 1 + 1 = 2 $ <eq1>
+
+See @eq1, @eq2, @eq3, @eq4
+
+#set math.equation(
+  numbering: numbering.with("(1)")
+)
+
+= Chapter 2
+
+$ 1 + 1 = 2 $ <eq2>
+
+See @eq1, @eq2, @eq3, @eq4
+
+#set math.equation(
+  numbering: numbering.with("(1)"),
+  supplement: "Test"
+)
+
+= Chapter 3
+
+$ 1 + 1 = 2 $ <eq3>
+
+See @eq1, @eq2, @eq3, @eq4
+
+#set math.equation(
+  numbering: numbering.with("(1)"),
+  supplement: none
+)
+#show ref: it => {
+  let eq = math.equation
+  let el = it.element
+  // Skip all other references.
+  if el == none or el.func() != eq { return it }
+  // Override equation references.
+  // TODO if el.numbering is a string pattern, we need to strip
+  // trimmed numbering by default https://github.com/typst/typst/blob/7c76edca62ee16ca4c6dd4f5498fe57793f28517/crates/typst-library/src/model/reference.rs#L339
+  // https://github.com/typst/typst/blob/7c76edca62ee16ca4c6dd4f5498fe57793f28517/crates/typst-library/src/model/numbering.rs#L301
+  // https://github.com/typst/codex/blob/0d70dbf5012a7b6765924534aeee4f5b64659ee9/src/numeral_systems.rs#L81
+  link(el.location(), el.supplement + " " + numbering(el.numbering, ..counter(eq).at(el.location())))
+}
+
+= Chapter 4
+
+$ 1 + 1 = 2 $ <eq4>
+
+See @eq1, @eq2, @eq3, @eq4
+
+#show: hallon.style-equations(heading-levels: 1).rule
+
+#set heading(numbering: "1.1")
+//#set math.equation(numbering: "(1.1)")
+
