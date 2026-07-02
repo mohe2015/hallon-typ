@@ -98,6 +98,26 @@
 	parts
 }
 
+#let get-counting-body(numbering-str) = {
+  // Define the official Typst counting symbols
+  let symbols = "1aAiIαΑ一壹あいアイא가ㄱ*١۱१১ক①⓵"
+  
+  // Regex matches: 
+  // 1. Non-symbols (Prefix)
+  // 2. The core body starting and ending with a symbol (Middle)
+  // 3. Non-symbols (Suffix)
+  let pattern = regex("^([^" + symbols + "]*)(.+?)([^" + symbols + "]*)$")
+  
+  let match-result = numbering-str.match(pattern)
+  
+  if match-result != none {
+    // The middle capture group contains the counting symbols and their inner dividers
+    return match-result.captures.at(1)
+  }
+  
+  return none
+}
+
 // get-heading-numbering returns the active heading numbering, padded or
 // truncated to the specified number of heading levels.
 #let get-heading-numbering(loc, heading-levels, heading-numbering: none) = {
