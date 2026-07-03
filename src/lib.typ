@@ -176,7 +176,10 @@
 			outer
 		}
 
-		set figure(numbering: (..nums) => numbering(figure-numbering-function.get(), ..nums))
+		set figure(numbering: (..nums) => {
+			let heading-counters = counter(heading).get().slice(0, heading-levels)
+			numbering(figure-numbering-function.get(), ..heading-counters, ..nums)
+		})
 
 		show figure.where(kind: image).or(figure.where(kind: table)).or(figure.where(kind: raw)): outer => {
 			// reset subfigure counter
