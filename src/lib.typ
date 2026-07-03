@@ -194,7 +194,9 @@
 			[
 				#numbering-trimmed.update(true)
 				// oh this here calls the numbering function with the location context of here which has wrong heading info
-				#link(el.location(), (el.numbering)(..counter(figure.where(kind: el.kind)).at(here())))
+				// hacky way to get the correct document location for the figure numbering function. manually calling it doesn't work
+				// unfortunately now we probably never can set numbering-trimmed
+				#link(el.location(), counter(figure.where(kind: el.kind)).display(at: el.location()))
 				#numbering-trimmed.update(false)
 			]
 		}
