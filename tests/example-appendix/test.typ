@@ -7,12 +7,10 @@
 
 // === [ Main matter ] =========================================================
 
-#let star = state("star", abc => abc + 1)
-
-#context star.get()(0)
-
 #set heading(numbering: "1.1")
-// if we could directly use the numbering of the figure it would be very clean. as the heading could have a different numbering and it would be clear which one it would use.
+#let chapter-figure-numbering = state("chapter-figure-numbering", (chapter, figure-number, trimmed: false) => numbering("1.1.1.1", ..chapter) + "." + numbering("I", figure-number))
+
+#context chapter-figure-numbering.get()((1, 2, 3), 1)
 
 #let example-fig = rect(fill: aqua)
 
