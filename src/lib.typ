@@ -67,62 +67,54 @@
 
 // === [ Numbering patterns ] ==================================================
 
-// https://github.com/typst/typst/blob/7c76edca62ee16ca4c6dd4f5498fe57793f28517/crates/typst-library/src/model/numbering.rs#L295
-#let parse-numbering-pattern(pattern) = {
-  let counting-symbols = ("1", "a", "A", "i", "I", "α", "Α", "一", "壹", "あ", "い", "ア", "イ", "א", "가", "ㄱ", "*", "١", "۱", "१", "১", "ক", "①", "⓵")
-  
+// A Typst re-implementation of `NumberingPattern::from_str`
+// (crates/typst-library/src/model/numbering.rs, line 295 in typst/typst
+// at commit 7c76edc) — written *in* the Typst language itself.
+//
+// The Rust original walks the pattern string char by char, and whenever it
+// hits a recognized "counting symbol" it closes off a (prefix, symbol)
+// piece, using everything since the last symbol as the prefix. Whatever is
+// left after the final symbol becomes the suffix.
+
+// The counting symbols listed in `numbering()`'s docs — just the set of
+// characters that select a numeral system (standing in for
+// `NamedNumeralSystem::from_shorthand`'s recognized shorthands).
+#let counting-symbols = (
+  "1", "a", "A", "i", "I", "α", "Α",
+  "一", "壹", "あ", "い", "ア", "イ",
+  "א", "가", "ㄱ", "*",
+  "١", "۱", "१", "১", "ক",
+  "①", "⓵",
+)
+
+/// Parses a numbering pattern (e.g. `"1.a.i)"`) into `(pieces, suffix)`,
+/// where `pieces` is an array of `(prefix, symbol)` tuples, mirroring
+/// `NumberingPattern { pieces, suffix, .. }` in the Rust source.
+///
+/// Panics with "invalid numbering pattern" if the pattern contains no
+/// counting symbol at all, matching the `Err("invalid numbering pattern")`
+/// branch of `from_str`.
+#let numbering-pattern-from-str(pattern) = {
   let pieces = ()
-  let handled = 0
-  let current-idx = 0
-  
-  for c in pattern.codepoints() {
-    let c-len = c.len()
-    
+  let prefix = "" // everything seen since the last counting symbol
+
+  for c in pattern {
     if c in counting-symbols {
-      let prefix = pattern.slice(handled, current-idx)
-      pieces.push((prefix: prefix, kind: c))
-      
-      handled = current-idx + c-len
+      pieces.push((prefix, c))
+      prefix = ""
+    } else {
+      prefix += c
     }
-    
-    current-idx += c-len
   }
-  
+
+  // Whatever's left after the last symbol is the suffix.
+  let suffix = prefix
+
   if pieces.len() == 0 {
     panic("invalid numbering pattern")
   }
-  
-  let suffix = pattern.slice(handled)
-  
-  return (pieces: pieces, suffix: suffix)
-}
 
-// get-heading-numbering returns the active heading numbering, padded or
-// truncated to the specified number of heading levels.
-#let get-heading-numbering(loc, heading-levels, heading-numbering: none) = {
-	let heading-numbering-str = heading-numbering
-	if heading-numbering == none {
-		// infer heading numbering from previous heading.
-		// default: none workaround for https://github.com/typst/typst/issues/7625
-		let prev-heading = query(selector(heading).before(loc)).last(default: none)
-		if prev-heading == none {
-			return none
-		}
-		if type(prev-heading.numbering) != str {
-			return none
-		}
-		heading-numbering-str = prev-heading.numbering
-	}
-	let parsed = parse-numbering-pattern(heading-numbering-str)
-	let parts = parsed.pieces
-	if parts.len() > heading-levels {
-		parts = parts.slice(0, heading-levels)
-	} else if parts.len() < heading-levels {
-		for i in range(parts.len(), heading-levels) {
-			parts.push((prefix: ".", kind: "1"))
-		}
-	}
-	return parts.map(a => a.prefix + a.kind).join("") + parsed.suffix
+  (pieces: pieces, suffix: suffix)
 }
 
 // === [ Subfigures ] ==========================================================
@@ -157,53 +149,19 @@
 	)
 }
 
-#let numbering-function(heading-levels, heading-numbering, location, ..nums) = {
-	// Numbering pattern
-	let numbering = "1."*heading-levels + "1"     // e.g. "1.1"
+#let get-counting-body(numbering-str) = {
+	numbering-str // TODO FIXME trim
+}
 
-	let numbering-str = numbering
-	let heading-nums = counter(heading).at(location)
-	if heading-nums.len() > heading-levels {
-		// truncate if needed.
-		heading-nums = heading-nums.slice(0, heading-levels)
-	} else if heading-nums.len() < heading-levels {
-		// zero pad if needed.
-		for i in range(heading-nums.len(), heading-levels) {
-			heading-nums.push(0)
-		}
-	}
-	if heading-levels > 0 {
-		// use active heading numbering if present (e.g. "A.1").
-		let heading-numbering-str = get-heading-numbering(location, heading-levels, heading-numbering: heading-numbering)
-		if heading-numbering-str != none {
-			numbering-str = heading-numbering-str + ".1"
-		}
-	}
-	std.numbering(numbering-str, ..heading-nums, ..nums)
+#let numbering-function(heading-levels, heading-numbering, location, ..nums) = {
+	let a = heading.numbering
+	counter(heading).display(at: location) + "." + std.numbering("1", ..nums)
 }
 
 #let subfigure-numbering-function(heading-levels, heading-numbering, kind, location, ..nums) = {
-	let subfig-numbering = "1."*heading-levels + "1a" // e.g. "1.1a"
-	let subfig-numbering-str = subfig-numbering
-	let heading-nums = counter(heading).at(location)
-	if heading-nums.len() > heading-levels {
-		// truncate if needed.
-		heading-nums = heading-nums.slice(0, heading-levels)
-	} else if heading-nums.len() < heading-levels {
-		// zero pad if needed.
-		for i in range(heading-nums.len(), heading-levels) {
-			heading-nums.push(0)
-		}
-	}
 	let outer-nums = counter(figure.where(kind: kind)).at(location)
-	if heading-levels > 0 {
-		// use active heading numbering if present (e.g. "A.1").
-		let heading-numbering-str = get-heading-numbering(location, heading-levels, heading-numbering: heading-numbering)
-		if heading-numbering-str != none {
-			subfig-numbering-str = heading-numbering-str + ".1a"
-		}
-	}
-	std.numbering(subfig-numbering-str, ..heading-nums, ..outer-nums, ..nums)
+	// uses the wrong format?
+	counter(heading).display(at: location) + "." + std.numbering("1a", ..outer-nums, ..nums)
 }
 
 // style-figures handles (optional heading-dependent) numbering of figures and

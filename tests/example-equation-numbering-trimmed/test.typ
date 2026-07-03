@@ -1,4 +1,4 @@
-#import "@preview/hallon:0.1.3" as hallon: subfigure, parse-numbering, get-counting-body
+#import "@preview/hallon:0.1.3" as hallon: subfigure, get-counting-body
 
 #set math.equation(numbering: "(1)")
 

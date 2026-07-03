@@ -15,7 +15,7 @@
 
 @figure-1, @figure-2, @figure-3, @figure-4, @figure-5, @figure-6
 
-#import "@preview/hallon:0.1.3" as hallon: parse-numbering-pattern
+#import "@preview/hallon:0.1.3" as hallon
 
 #show: hallon.style-figures(heading-levels: 1).rule
 
