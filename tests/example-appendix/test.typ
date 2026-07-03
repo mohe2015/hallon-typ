@@ -152,8 +152,8 @@ $ 1 + 1 = 2 $ <eq4>
 // === [ Appendix example ] ====================================================
 
 #set heading(numbering: "①")
-#figure-numbering-function.update("①.I.I.I.1")
-#subfigure-numbering-function.update("①.I.I.I.1a")
+#subfigure-numbering-function.update(old => (..nums) => numbering("①.I.I.I.1", ..nums))
+#subfigure-numbering-function.update(old => (..nums) => numbering("①.I.I.I.1a", ..nums))
 
 #counter(heading).update(0) // reset heading counter for appendices.
 

@@ -190,7 +190,9 @@
 
 			// use nesting level of figure to infer numbering of subfigures.
 			set figure(numbering: (..nums) => {
-				numbering(subfigure-numbering-function.get(), ..nums)
+				let heading-counters = counter(heading).get().slice(0, heading-levels)
+				let outer-nums = counter(figure.where(kind: outer.kind)).get()
+				numbering(subfigure-numbering-function.get(), ..heading-counters, ..outer-nums, ..nums)
 			})
 
 			// Set default supplement for subfigures.
