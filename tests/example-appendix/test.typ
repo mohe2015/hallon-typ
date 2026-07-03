@@ -8,7 +8,7 @@
 // === [ Main matter ] =========================================================
 
 #set heading(numbering: "1.1.1.1")
-#figure-numbering-function.update("I.I.I.I.1")
+#figure-numbering-function.update("1.1.1.1.1")
 #subfigure-numbering-function.update("1.1.1.1.1.1a")
 
 #let example-fig = rect(fill: aqua)

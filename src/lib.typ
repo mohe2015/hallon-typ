@@ -188,12 +188,12 @@
 			}
 		})
 
-
 		show ref: it => {
 			let el = it.element
 			if el == none or el.func() != figure { return it }
 			[
 				#numbering-trimmed.update(true)
+				// oh this here calls the numbering function with the location context of here which has wrong heading info
 				#link(el.location(), (el.numbering)(..counter(figure.where(kind: el.kind)).at(here())))
 				#numbering-trimmed.update(false)
 			]
@@ -208,9 +208,13 @@
 
 			// use nesting level of figure to infer numbering of subfigures.
 			set figure(numbering: (..nums) => {
-				let heading-counters = counter(heading).get().slice(0, heading-levels)
-				let outer-nums = counter(figure.where(kind: outer.kind)).at(outer.location())
-				numbering(subfigure-numbering-function.get(), ..heading-counters, ..outer-nums, ..nums)
+				if numbering-trimmed.get() {
+					"trimmed"
+				} else {
+					let heading-counters = counter(heading).get().slice(0, heading-levels)
+					let outer-nums = counter(figure.where(kind: outer.kind)).at(outer.location())
+					numbering(subfigure-numbering-function.get(), ..heading-counters, ..outer-nums, ..nums)
+				}
 			})
 
 			// Set default supplement for subfigures.
