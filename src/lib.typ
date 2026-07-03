@@ -193,7 +193,7 @@
 			if el == none or el.func() != figure { return it }
 			[
 				#numbering-trimmed.update(true)
-				#link(el.location(), counter(figure.where(kind: figure.kind)).display(at: it.element.location()))
+				#link(el.location(), counter(figure.where(kind: el.kind)).display(at: it.element.location()))
 				#numbering-trimmed.update(false)
 			]
 		}
