@@ -70,8 +70,7 @@ See @eq1, @eq2, @eq3, @eq4
 
 #show: hallon.style-equations(heading-levels: 1).rule
 
-#set heading(numbering: "1.1")
-//#set math.equation(numbering: "(1.1)")
+#set math.equation(numbering: "(1.1)")
 
 = Chapter 5
 

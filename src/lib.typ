@@ -19,7 +19,7 @@
 // === [ Image notes ] =========================================================
 
 // TODO: remove font parameter when custom types are implemented in Typst. Then
-// use a `#show image-notes: set text(font: font-sans, weight: "bold")` rule
+// use a `#show image-notes: set text(font: font-sans, weight: "bold ")` rule
 // from the user instead.
 //
 // See https://github.com/typst/typst/issues/147
