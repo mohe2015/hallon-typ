@@ -1,4 +1,5 @@
 // TODO only support function that takes heading and rest parts separately
+// TODO fully use state to enable and disable? then the ref rule can reference that?
 #let figure-numbering-function = state("figure-numbering-function", "1")
 #let subfigure-numbering-function = state("subfigure-numbering-function", "1a")
 #let numbering-trimmed = state("numbering-trimmed", false)
@@ -193,7 +194,7 @@
 			if el == none or el.func() != figure { return it }
 			[
 				#numbering-trimmed.update(true)
-				#link(el.location(), counter(figure.where(kind: el.kind)).display(at: it.element.location()))
+				#link(el.location(), (el.numbering)(..counter(figure.where(kind: el.kind)).at(here())))
 				#numbering-trimmed.update(false)
 			]
 		}
