@@ -1,5 +1,7 @@
+// TODO only support function that takes heading and rest parts separately
 #let figure-numbering-function = state("figure-numbering-function", "1")
 #let subfigure-numbering-function = state("subfigure-numbering-function", "1a")
+#let numbering-trimmed = state("numbering-trimmed", false)
 
 // Reasoning: We have to override the numbering function to do our custom magic, so we can't really use the value of that numbering function for users to customize our numbering
 
@@ -147,7 +149,7 @@
 		center,
 		block({
 			set align(left)
-			strong(it.counter.display("(a)"))
+			strong(it.counter.display(it.numbering))
 			[ ]
 			it.body
 		})
@@ -177,9 +179,24 @@
 		}
 
 		set figure(numbering: (..nums) => {
-			let heading-counters = counter(heading).get().slice(0, heading-levels)
-			numbering(figure-numbering-function.get(), ..heading-counters, ..nums)
+			if numbering-trimmed.get() {
+				"trimmed"
+			} else {
+				let heading-counters = counter(heading).get().slice(0, heading-levels)
+				numbering(figure-numbering-function.get(), ..heading-counters, ..nums)
+			}
 		})
+
+
+		show ref: it => {
+			let el = it.element
+			if el == none or el.func() != figure { return it }
+			[
+				#numbering-trimmed.update(true)
+				#link(el.location(), counter(figure.where(kind: figure.kind)).display(at: it.element.location()))
+				#numbering-trimmed.update(false)
+			]
+		}
 
 		show figure.where(kind: image).or(figure.where(kind: table)).or(figure.where(kind: raw)): outer => {
 			// reset subfigure counter
@@ -191,7 +208,7 @@
 			// use nesting level of figure to infer numbering of subfigures.
 			set figure(numbering: (..nums) => {
 				let heading-counters = counter(heading).get().slice(0, heading-levels)
-				let outer-nums = counter(figure.where(kind: outer.kind)).get()
+				let outer-nums = counter(figure.where(kind: outer.kind)).at(outer.location())
 				numbering(subfigure-numbering-function.get(), ..heading-counters, ..outer-nums, ..nums)
 			})
 
