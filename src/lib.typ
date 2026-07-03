@@ -157,53 +157,53 @@
 	)
 }
 
-#let universal-figure-numbering(
-  heading-levels, 
-  heading-numbering, 
-  location, 
-  kind: none,
-  is-sub-fig: false,
-  ..nums
-) = {
-  // 1. Determine the base numbering pattern based on whether it's a subfigure
-  let numbering-suffix = if is-sub-fig { "1a" } else { "1" }
-  let base-pattern = "1." * heading-levels + numbering-suffix
-  let final-pattern = base-pattern
+#let numbering-function(heading-levels, heading-numbering, location, ..nums) = {
+	// Numbering pattern
+	let numbering = "1."*heading-levels + "1"     // e.g. "1.1"
 
-  // 2. Fetch and normalize heading numbers (Truncate / Zero-pad)
-  let heading-nums = counter(heading).at(location)
-  if heading-nums.len() > heading-levels {
-    heading-nums = heading-nums.slice(0, heading-levels)
-  } else {
-    while heading-nums.len() < heading-levels {
-      heading-nums.push(0)
-    }
-  }
+	let numbering-str = numbering
+	let heading-nums = counter(heading).at(location)
+	if heading-nums.len() > heading-levels {
+		// truncate if needed.
+		heading-nums = heading-nums.slice(0, heading-levels)
+	} else if heading-nums.len() < heading-levels {
+		// zero pad if needed.
+		for i in range(heading-nums.len(), heading-levels) {
+			heading-nums.push(0)
+		}
+	}
+	if heading-levels > 0 {
+		// use active heading numbering if present (e.g. "A.1").
+		let heading-numbering-str = get-heading-numbering(location, heading-levels, heading-numbering: heading-numbering)
+		if heading-numbering-str != none {
+			numbering-str = heading-numbering-str + ".1"
+		}
+	}
+	std.numbering(numbering-str, ..heading-nums, ..nums)
+}
 
-  // 3. Handle custom heading numbering prefix (e.g., "A.1")
-  if heading-levels > 0 {
-    let heading-numbering-str = get-heading-numbering(
-      location, 
-      heading-levels, 
-      heading-numbering: heading-numbering
-    )
-    if heading-numbering-str != none {
-      final-pattern = heading-numbering-str + "." + numbering-suffix
-    }
-  }
-
-  // 4. Gather the arguments for std.numbering
-  let numbering-args = heading-nums
-  
-  if is-sub-fig and kind != none {
-    let outer-nums = counter(figure.where(kind: kind)).at(location)
-    numbering-args += outer-nums
-  }
-  
-  numbering-args += nums.pos()
-
-  // 5. Output the standard Typst numbering
-  std.numbering(final-pattern, ..numbering-args)
+#let subfigure-numbering-function(heading-levels, heading-numbering, kind, location, ..nums) = {
+	let subfig-numbering = "1."*heading-levels + "1a" // e.g. "1.1a"
+	let subfig-numbering-str = subfig-numbering
+	let heading-nums = counter(heading).at(location)
+	if heading-nums.len() > heading-levels {
+		// truncate if needed.
+		heading-nums = heading-nums.slice(0, heading-levels)
+	} else if heading-nums.len() < heading-levels {
+		// zero pad if needed.
+		for i in range(heading-nums.len(), heading-levels) {
+			heading-nums.push(0)
+		}
+	}
+	let outer-nums = counter(figure.where(kind: kind)).at(location)
+	if heading-levels > 0 {
+		// use active heading numbering if present (e.g. "A.1").
+		let heading-numbering-str = get-heading-numbering(location, heading-levels, heading-numbering: heading-numbering)
+		if heading-numbering-str != none {
+			subfig-numbering-str = heading-numbering-str + ".1a"
+		}
+	}
+	std.numbering(subfig-numbering-str, ..heading-nums, ..outer-nums, ..nums)
 }
 
 // style-figures handles (optional heading-dependent) numbering of figures and
@@ -228,7 +228,7 @@
 			outer
 		}
 
-		set figure(numbering: (..nums) => universal-figure-numbering(heading-levels, heading-numbering, here(), ..nums))
+		set figure(numbering: (..nums) => numbering-function(heading-levels, heading-numbering, here(), ..nums))
 
 		show figure.where(kind: image).or(figure.where(kind: table)).or(figure.where(kind: raw)): outer => {
 			// reset subfigure counter
@@ -239,7 +239,7 @@
 
 			// use nesting level of figure to infer numbering of subfigures.
 			set figure(numbering: (..nums) => {
-				universal-figure-numbering(heading-levels, heading-numbering, outer.kind, outer.location(), is-sub-fig: true, ..nums)
+				subfigure-numbering-function(heading-levels, heading-numbering, outer.kind, outer.location(), ..nums)
 			})
 
 			// Set default supplement for subfigures.
@@ -258,9 +258,9 @@
 	numbering-function: ref => {
 		if ref.element.kind == "subfigure" {
 			let kind = query(selector(figure.where(kind: image).or(figure.where(kind: table)).or(figure.where(kind: raw))).before(ref.element.location())).last().kind
-			universal-figure-numbering.with(heading-levels, heading-numbering, kind, ref.element.location(), is-sub-fig: true)
+			subfigure-numbering-function.with(heading-levels, heading-numbering, kind, ref.element.location())
 		} else {
-			universal-figure-numbering.with(heading-levels, heading-numbering, ref.element.location())
+			numbering-function.with(heading-levels, heading-numbering, ref.element.location())
 		}
 	}
 )
@@ -279,11 +279,11 @@
 			outer
 		}
 
-		set math.equation(numbering: (..nums) => universal-figure-numbering(heading-levels, heading-numbering, here(), ..nums))
+		set math.equation(numbering: (..nums) => numbering-function(heading-levels, heading-numbering, here(), ..nums))
 
 		body
 	},
-	numbering-function: ref => universal-figure-numbering.with(heading-levels, heading-numbering, ref.element.location())
+	numbering-function: ref => numbering-function.with(heading-levels, heading-numbering, ref.element.location())
 )
 
 // subfigure creates a new subfigure with the given arguments and an optional
