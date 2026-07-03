@@ -67,55 +67,34 @@
 
 // === [ Numbering patterns ] ==================================================
 
-// is-counting-symbol reports whether the given codepoint is a counting symbol
-// in a numbering pattern.
-//
-// ref: https://typst.app/docs/reference/model/numbering/#parameters-numbering
-#let is-counting-symbol(r) = {
-	let counting-symbols = (
-		"1", "a", "A", "i", "I", "α", "Α", "一", "壹", "あ",
-		"い", "ア", "イ", "א", "가", "ㄱ", "*", "١", "۱", "१",
-		"১", "ক", "①", "⓵",
-	)
-	return counting-symbols.contains(r)
-}
-
-// parse-numbering pasers the given numbering pattern.
-//
-// ref: https://typst.app/docs/reference/model/numbering/#parameters-numbering
-#let parse-numbering(numbering) = {
-	let rs = numbering.codepoints()
-	let parts = ()
-	while true {
-		let pos = rs.position(is-counting-symbol)
-		if pos == none {
-			break
-		}
-		let part = rs.slice(0, pos+1).join("")
-		rs = rs.slice(pos+1)
-		parts.push(part)
-	}
-	parts
-}
-
-#let get-counting-body(numbering-str) = {
-  // Define the official Typst counting symbols
-  let symbols = "1aAiIαΑ一壹あいアイא가ㄱ*١۱१১ক①⓵"
+// https://github.com/typst/typst/blob/7c76edca62ee16ca4c6dd4f5498fe57793f28517/crates/typst-library/src/model/numbering.rs#L295
+#let parse-numbering-pattern(pattern) = {
+  let counting-symbols = ("1", "a", "A", "i", "I", "α", "Α", "一", "壹", "あ", "い", "ア", "イ", "א", "가", "ㄱ", "*", "١", "۱", "१", "১", "ক", "①", "⓵")
   
-  // Regex matches: 
-  // 1. Non-symbols (Prefix)
-  // 2. The core body starting and ending with a symbol (Middle)
-  // 3. Non-symbols (Suffix)
-  let pattern = regex("^([^" + symbols + "]*)(.+?)([^" + symbols + "]*)$")
+  let pieces = ()
+  let handled = 0
+  let current-idx = 0
   
-  let match-result = numbering-str.match(pattern)
-  
-  if match-result != none {
-    // The middle capture group contains the counting symbols and their inner dividers
-    return match-result.captures.at(1)
+  for c in pattern.codepoints() {
+    let c-len = c.len()
+    
+    if c in counting-symbols {
+      let prefix = pattern.slice(handled, current-idx)
+      pieces.push((prefix: prefix, kind: c))
+      
+      handled = current-idx + c-len
+    }
+    
+    current-idx += c-len
   }
   
-  return none
+  if pieces.len() == 0 {
+    panic("invalid numbering pattern")
+  }
+  
+  let suffix = pattern.slice(handled)
+  
+  return (pieces: pieces, suffix: suffix)
 }
 
 // get-heading-numbering returns the active heading numbering, padded or
@@ -134,15 +113,16 @@
 		}
 		heading-numbering-str = prev-heading.numbering
 	}
-	let parts = parse-numbering(heading-numbering-str)
+	let parsed = parse-numbering-pattern(heading-numbering-str)
+	let parts = parsed.pieces
 	if parts.len() > heading-levels {
 		parts = parts.slice(0, heading-levels)
 	} else if parts.len() < heading-levels {
 		for i in range(parts.len(), heading-levels) {
-			parts.push(".1")
+			parts.push((prefix: ".", kind: "1"))
 		}
 	}
-	return parts.join("")
+	return parts.map(a => a.prefix + a.kind).join("") + parsed.suffix
 }
 
 // === [ Subfigures ] ==========================================================
@@ -196,7 +176,7 @@
 		// use active heading numbering if present (e.g. "A.1").
 		let heading-numbering-str = get-heading-numbering(location, heading-levels, heading-numbering: heading-numbering)
 		if heading-numbering-str != none {
-			numbering-str = heading-numbering-str + ".1.a"
+			numbering-str = heading-numbering-str + ".1"
 		}
 	}
 	std.numbering(numbering-str, ..heading-nums, ..nums)
