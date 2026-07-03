@@ -1,3 +1,8 @@
+#let figure-numbering-function = state("figure-numbering-function", "1")
+#let subfigure-numbering-function = state("subfigure-numbering-function", "1a")
+
+// Reasoning: We have to override the numbering function to do our custom magic, so we can't really use the value of that numbering function for users to customize our numbering
+
 // === [ Named references ] ====================================================
 
 // nameref displays a reference using section name (instead of numbering).
@@ -149,21 +154,6 @@
 	)
 }
 
-#let get-counting-body(numbering-str) = {
-	numbering-str // TODO FIXME trim
-}
-
-#let numbering-function(heading-levels, location, ..nums) = {
-	let numbering = query(selector(heading).before(location)).last(default: (numbering: "1")).numbering
-	counter(heading).display(numbering, at: location) + "." + std.numbering("1", ..nums)
-}
-
-#let subfigure-numbering-function(heading-levels, kind, location, ..nums) = {
-	let outer-nums = counter(figure.where(kind: kind)).at(location)
-	let numbering = query(selector(heading).before(location)).last(default: (numbering: "1")).numbering
-	counter(heading).display(numbering, at: location) + "." + std.numbering("1a", ..outer-nums, ..nums)
-}
-
 // style-figures handles (optional heading-dependent) numbering of figures and
 // subfigures.
 #let style-figures(
@@ -186,7 +176,7 @@
 			outer
 		}
 
-		set figure(numbering: (..nums) => numbering-function(heading-levels, here(), ..nums))
+		set figure(numbering: (..nums) => numbering(figure-numbering-function.get(), ..nums))
 
 		show figure.where(kind: image).or(figure.where(kind: table)).or(figure.where(kind: raw)): outer => {
 			// reset subfigure counter
@@ -197,7 +187,7 @@
 
 			// use nesting level of figure to infer numbering of subfigures.
 			set figure(numbering: (..nums) => {
-				subfigure-numbering-function(heading-levels, outer.kind, outer.location(), ..nums)
+				numbering(subfigure-numbering-function.get(), ..nums)
 			})
 
 			// Set default supplement for subfigures.
@@ -213,14 +203,6 @@
 
 		body
 	},
-	numbering-function: ref => {
-		if ref.element.kind == "subfigure" {
-			let kind = query(selector(figure.where(kind: image).or(figure.where(kind: table)).or(figure.where(kind: raw))).before(ref.element.location())).last().kind
-			subfigure-numbering-function.with(heading-levels, kind, ref.element.location())
-		} else {
-			numbering-function.with(heading-levels, ref.element.location())
-		}
-	}
 )
 
 // style-equations handles (optional heading-dependent) numbering of equations
@@ -237,11 +219,12 @@
 			outer
 		}
 
-		set math.equation(numbering: (..nums) => numbering-function(heading-levels, here(), ..nums))
+		set math.equation(numbering: (n) => {
+
+		})
 
 		body
 	},
-	numbering-function: ref => numbering-function.with(heading-levels, heading-numbering, ref.element.location())
 )
 
 // subfigure creates a new subfigure with the given arguments and an optional

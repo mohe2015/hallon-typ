@@ -1,16 +1,15 @@
 #set page(width: 12cm, height: auto)
 
-#import "@preview/hallon:0.1.3" as hallon: subfigure
+#import "@preview/hallon:0.1.3" as hallon: subfigure, figure-numbering-function, subfigure-numbering-function
 
 #show: hallon.style-figures(heading-levels: 1).rule
 #show: hallon.style-equations(heading-levels: 1).rule
 
 // === [ Main matter ] =========================================================
 
-#set heading(numbering: "1.1")
-#let chapter-figure-numbering = state("chapter-figure-numbering", (chapter, figure-number, trimmed: false) => numbering("1.1.1.1", ..chapter) + "." + numbering("I", figure-number))
-
-#context chapter-figure-numbering.get()((1, 2, 3), 1)
+#set heading(numbering: "1.1.1.1")
+#figure-numbering-function.update("I.I.I.I.1")
+#subfigure-numbering-function.update("I.I.I.I.1a")
 
 #let example-fig = rect(fill: aqua)
 
