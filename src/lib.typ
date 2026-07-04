@@ -98,33 +98,6 @@
 	parts
 }
 
-// get-heading-numbering returns the active heading numbering, padded or
-// truncated to the specified number of heading levels.
-#let get-heading-numbering(loc, heading-levels, heading-numbering: none) = {
-	let heading-numbering-str = heading-numbering
-	if heading-numbering == none {
-		// infer heading numbering from previous heading.
-		// default: none workaround for https://github.com/typst/typst/issues/7625
-		let prev-heading = query(selector(heading).before(loc)).last(default: none)
-		if prev-heading == none {
-			return none
-		}
-		if type(prev-heading.numbering) != str {
-			return none
-		}
-		heading-numbering-str = prev-heading.numbering
-	}
-	let parts = parse-numbering(heading-numbering-str)
-	if parts.len() > heading-levels {
-		parts = parts.slice(0, heading-levels)
-	} else if parts.len() < heading-levels {
-		for i in range(parts.len(), heading-levels) {
-			parts.push(".1")
-		}
-	}
-	return parts.join("")
-}
-
 // === [ Subfigures ] ==========================================================
 
 // figure-caption displays the caption of figures.
@@ -157,53 +130,15 @@
 	)
 }
 
-#let numbering-function(heading-levels, heading-numbering, location, ..nums) = {
-	// Numbering pattern
-	let numbering = "1."*heading-levels + "1"     // e.g. "1.1"
-
-	let numbering-str = numbering
+#let numbering-function(heading-levels, heading-numbering, location, trimmed: false, ..nums) = {
 	let heading-nums = counter(heading).at(location)
-	if heading-nums.len() > heading-levels {
-		// truncate if needed.
-		heading-nums = heading-nums.slice(0, heading-levels)
-	} else if heading-nums.len() < heading-levels {
-		// zero pad if needed.
-		for i in range(heading-nums.len(), heading-levels) {
-			heading-nums.push(0)
-		}
-	}
-	if heading-levels > 0 {
-		// use active heading numbering if present (e.g. "A.1").
-		let heading-numbering-str = get-heading-numbering(location, heading-levels, heading-numbering: heading-numbering)
-		if heading-numbering-str != none {
-			numbering-str = heading-numbering-str + ".1.a"
-		}
-	}
-	std.numbering(numbering-str, ..heading-nums, ..nums)
+	std.numbering(query(selector(heading).before(location)).last(default: (numbering: "1")).numbering, trimmed: trimmed, ..heading-nums) + "." + std.numbering("1", ..nums, trimmed: trimmed)
 }
 
-#let subfigure-numbering-function(heading-levels, heading-numbering, kind, location, ..nums) = {
-	let subfig-numbering = "1."*heading-levels + "1a" // e.g. "1.1a"
-	let subfig-numbering-str = subfig-numbering
+#let subfigure-numbering-function(heading-levels, heading-numbering, kind, location, trimmed: false, ..nums) = {
 	let heading-nums = counter(heading).at(location)
-	if heading-nums.len() > heading-levels {
-		// truncate if needed.
-		heading-nums = heading-nums.slice(0, heading-levels)
-	} else if heading-nums.len() < heading-levels {
-		// zero pad if needed.
-		for i in range(heading-nums.len(), heading-levels) {
-			heading-nums.push(0)
-		}
-	}
 	let outer-nums = counter(figure.where(kind: kind)).at(location)
-	if heading-levels > 0 {
-		// use active heading numbering if present (e.g. "A.1").
-		let heading-numbering-str = get-heading-numbering(location, heading-levels, heading-numbering: heading-numbering)
-		if heading-numbering-str != none {
-			subfig-numbering-str = heading-numbering-str + ".1a"
-		}
-	}
-	std.numbering(subfig-numbering-str, ..heading-nums, ..outer-nums, ..nums)
+	std.numbering(query(selector(heading).before(location)).last(default: (numbering: "1")).numbering, trimmed: trimmed, ..heading-nums) + "." + std.numbering("1a", ..outer-nums, ..nums, trimmed: trimmed)
 }
 
 // style-figures handles (optional heading-dependent) numbering of figures and

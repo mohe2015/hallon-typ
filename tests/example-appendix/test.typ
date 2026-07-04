@@ -3,7 +3,7 @@
 #import "@preview/hallon:0.1.3" as hallon: subfigure
 
 #show: hallon.style-figures(heading-levels: 1).rule
-#show: hallon.style-equations(heading-levels: 1).rule
+#show: hallon.style-equations(heading-levels: 1, heading-numbering: "(1.1)").rule
 
 // === [ Main matter ] =========================================================
 
