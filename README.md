@@ -48,15 +48,9 @@ Hallon (`ˈhàlɔn`) means raspberry in Swedish, a befitting name for a package 
 
 ## Development
 
-Use https://github.com/typst-community/tytanic for testing.
-
-Create a symlink to more easily develop your package changes:
-
+```bash
+cargo install --locked --git https://github.com/mohe2015/tytanic --branch custom-typst
+TYPST_PACKAGE_PATH=$PWD/packages tt run
 ```
-DEV_TEMPLATE=hallon
-DEV_VERSION=0.1.3
 
-mkdir -p ~/.cache/typst/packages/preview/$DEV_TEMPLATE
-rm -R ~/.cache/typst/packages/preview/$DEV_TEMPLATE/$DEV_VERSION
-ln -s $PWD ~/.cache/typst/packages/preview/$DEV_TEMPLATE/$DEV_VERSION
-```
+Start your editor with `TYPST_PACKAGE_PATH=$PWD/packages` set.
