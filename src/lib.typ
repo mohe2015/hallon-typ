@@ -132,7 +132,12 @@
 
 #let numbering-function(heading-levels, heading-numbering, location, trimmed: false, ..nums) = {
 	let heading-nums = counter(heading).at(location)
-	std.numbering(query(selector(heading).before(location)).last(default: (numbering: "1")).numbering, trimmed: trimmed, ..heading-nums) + "." + std.numbering("1", ..nums, trimmed: trimmed)
+	let tmp = std.numbering(query(selector(heading).before(location)).last(default: (numbering: "1")).numbering, trimmed: trimmed, ..heading-nums) + "." + std.numbering("1", ..nums, trimmed: trimmed)
+	if trimmed {
+		tmp
+	} else {
+		"(" + tmp + ")"
+	}
 }
 
 #let subfigure-numbering-function(heading-levels, heading-numbering, kind, location, trimmed: false, ..nums) = {
