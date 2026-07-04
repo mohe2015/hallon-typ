@@ -2,8 +2,6 @@
 
 #import "@preview/hallon:0.1.3" as hallon: subfigure
 
-#set math.equation(numbering: "(1.1)")
-
 #show: hallon.style-figures(heading-levels: 1).rule
 #show: hallon.style-equations(heading-levels: 1, heading-numbering: "(1.1)").rule
 

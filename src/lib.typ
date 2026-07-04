@@ -132,18 +132,28 @@
 
 #let numbering-function(heading-levels, heading-numbering, location, trimmed: false, ..nums) = {
 	let heading-nums = counter(heading).at(location)
-	let tmp = std.numbering(query(selector(heading).before(location)).last(default: (numbering: "1")).numbering, trimmed: trimmed, ..heading-nums) + "." + std.numbering("1", ..nums, trimmed: trimmed)
-	if trimmed {
-		tmp
+	let heading-numbering = query(selector(heading).before(location)).last(default: (numbering: "1")).numbering
+	if heading-numbering == none or heading-levels == 0 {
+		std.numbering("1", ..nums, trimmed: trimmed)
 	} else {
-		"(" + tmp + ")"
+		let tmp = std.numbering(heading-numbering, trimmed: trimmed, ..heading-nums) + "." + std.numbering("1", ..nums, trimmed: trimmed)
+			if trimmed {
+				tmp
+			} else {
+				"(" + tmp + ")"
+			}
 	}
 }
 
 #let subfigure-numbering-function(heading-levels, heading-numbering, kind, location, trimmed: false, ..nums) = {
-	let heading-nums = counter(heading).at(location)
 	let outer-nums = counter(figure.where(kind: kind)).at(location)
-	std.numbering(query(selector(heading).before(location)).last(default: (numbering: "1")).numbering, trimmed: trimmed, ..heading-nums) + "." + std.numbering("1a", ..outer-nums, ..nums, trimmed: trimmed)
+	let heading-nums = counter(heading).at(location)
+	let heading-numbering = query(selector(heading).before(location)).last(default: (numbering: "1")).numbering
+	if heading-numbering == none or heading-levels == 0 {
+		std.numbering("1a", ..outer-nums, ..nums, trimmed: trimmed)
+	} else {
+		std.numbering(heading-numbering, trimmed: trimmed, ..heading-nums) + "." + std.numbering("1a", ..outer-nums, ..nums, trimmed: trimmed)
+	}
 }
 
 // style-figures handles (optional heading-dependent) numbering of figures and

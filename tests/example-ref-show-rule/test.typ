@@ -11,6 +11,7 @@
   if it.element == none or it.element.func() != math.equation { return it }
   link(it.element.location(), "Eq. " + numbering(
     (style-equations.numbering-function)(it),
+		trimmed: true,
     ..counter(math.equation).at(it.element.location())
   ))
 }
@@ -19,6 +20,7 @@
   if it.element == none or it.element.func() != figure { return it }
   link(it.element.location(), "Fig. " + numbering(
     (style-figures.numbering-function)(it),
+		trimmed: true,
     ..counter(figure.where(kind: it.element.kind)).at(it.element.location())
   ))
 }
